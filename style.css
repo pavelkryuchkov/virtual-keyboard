@@ -8,7 +8,7 @@ body {
 .textarea {
   width: 880px;
   height: 200px;
-  margin-top: 50px;
+  margin-top: 30px;
   font-size: 20px;
 }
 
@@ -17,6 +17,7 @@ body {
   flex-direction: column;
   gap: 3px;
   margin-top: 50px;
+  margin-bottom: 25px;
   padding: 5px;
   border-radius: 5px;
   background-color: rgb(0, 0, 210);
@@ -41,6 +42,8 @@ body {
   background-color: darkblue;
   border-radius: 5px;
   user-select: none;
+  cursor: pointer;
+  transition: all 0.1s;
 }
 
 .key_dark {
@@ -54,4 +57,10 @@ body {
 
 .key_whitespace {
   min-width: 403px;
+}
+
+.key_active,
+.key:active {
+  background-color: rgb(32, 32, 188);
+  border-radius: 26.4px;
 }
