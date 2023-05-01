@@ -1,9 +1,13 @@
 import {
   KEYS,
-  KEYS_DARK,
+  KEYS_RU,
   KEYS_SHIFT,
+  KEYS_SHIFT_RU,
   KEYS_CAPS,
+  KEYS_CAPS_RU,
   KEYS_CAPS_SHIFT,
+  KEYS_CAPS_SHIFT_RU,
+  KEYS_DARK,
   CODES_MAP,
 } from './constants.js';
 
@@ -15,15 +19,30 @@ function renderPage() {
   const keyboard = document.createElement('div');
   keyboard.classList.add('keyboard');
   document.body.append(keyboard);
+
+  const text1 = document.createElement('p');
+  text1.textContent = 'Клавиатура создана в операционной системе Windows';
+  document.body.append(text1);
+
+  const text2 = document.createElement('p');
+  text2.textContent = 'Для переключения языка комбинация: левыe ctrl + alt';
+  document.body.append(text2);
 }
 
 renderPage();
 
 const keyboard = document.querySelector('.keyboard');
 const textarea = document.querySelector('.textarea');
-let keys = KEYS;
+let lang;
+if (localStorage.getItem('keyboardLanguage')) {
+  lang = localStorage.getItem('keyboardLanguage');
+} else {
+  lang = 'en';
+}
+let keys = lang === 'en' ? KEYS : KEYS_RU;
 let keysPressed = [];
 let shiftPressed = false;
+let shiftMousePressed = false;
 let capsPressed = false;
 
 function createKey(key, id) {
@@ -33,7 +52,6 @@ function createKey(key, id) {
     ${KEYS_DARK.includes(key) ? 'key_dark' : ''}
     ${key.length > 1 ? 'key_long' : ''} 
     ${key === 'Whitespace' ? 'key_whitespace' : ''}
-    ${keysPressed.includes(id) ? 'key_active' : ''}
     "
     data-key-id="${id}"
     >
@@ -55,6 +73,13 @@ function renderKeys() {
     keyboardRow.innerHTML = rowHTML;
     keyboard.append(keyboardRow);
   });
+  Array.from(keyboard.children).forEach((row) => {
+    Array.from(row.children).forEach((key) => {
+      if (keysPressed.includes(key.dataset.keyId)) {
+        key.classList.add('key_active');
+      }
+    });
+  });
 }
 
 renderKeys();
@@ -73,8 +98,8 @@ keyboard.addEventListener('mousedown', (event) => {
   // key.classList.add('key_active');
 
   textarea.focus();
-  let start = textarea.selectionStart;
-  let end = textarea.selectionEnd;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
   const prevValue = textarea.value;
   let keyText = key.textContent.trim();
 
@@ -112,9 +137,9 @@ keyboard.addEventListener('mousedown', (event) => {
       key.classList.remove('key_active');
       keysPressed = keysPressed.filter((id) => id !== key.dataset.keyId);
       if (shiftPressed) {
-        keys = KEYS_SHIFT;
+        keys = lang === 'en' ? KEYS_SHIFT : KEYS_SHIFT_RU;
       } else {
-        keys = KEYS;
+        keys = lang === 'en' ? KEYS : KEYS_RU;
       }
       renderKeys();
     } else {
@@ -122,20 +147,21 @@ keyboard.addEventListener('mousedown', (event) => {
       key.classList.add('key_active');
       keysPressed.push(key.dataset.keyId);
       if (shiftPressed) {
-        keys = KEYS_CAPS_SHIFT;
+        keys = lang === 'en' ? KEYS_CAPS_SHIFT : KEYS_CAPS_SHIFT_RU;
       } else {
-        keys = KEYS_CAPS;
+        keys = lang === 'en' ? KEYS_CAPS : KEYS_CAPS_RU;
       }
       renderKeys();
     }
   } else if (keyText === 'Shift') {
     shiftPressed = true;
+    shiftMousePressed = true;
     keysPressed.push(key.dataset.keyId);
     if (capsPressed) {
-      keys = KEYS_CAPS_SHIFT;
+      keys = lang === 'en' ? KEYS_CAPS_SHIFT : KEYS_CAPS_SHIFT_RU;
       renderKeys();
     } else {
-      keys = KEYS_SHIFT;
+      keys = lang === 'en' ? KEYS_SHIFT : KEYS_SHIFT_RU;
       renderKeys();
     }
   } else {
@@ -159,22 +185,23 @@ keyboard.addEventListener('mousedown', (event) => {
   // console.log(keysPressed);
 });
 
-document.addEventListener('mouseup', (event) => {
+document.addEventListener('mouseup', () => {
   // for (const row of keyboard.children) {
   //   for (const key of row.children) {
   //     key.classList.remove('key_active');
   //   }
   // }
-  if (shiftPressed) {
+  if (shiftMousePressed) {
     shiftPressed = false;
+    shiftMousePressed = false;
     keysPressed = keysPressed.filter((id) => id !== '3,0' && id !== '3,12');
 
     if (capsPressed) {
-      keys = KEYS_CAPS;
+      keys = lang === 'en' ? KEYS_CAPS : KEYS_CAPS_RU;
       renderKeys();
     } else {
-      keys = KEYS;
-      renderKeys(KEYS);
+      keys = lang === 'en' ? KEYS : KEYS_RU;
+      renderKeys();
     }
   }
 });
@@ -182,28 +209,35 @@ document.addEventListener('mouseup', (event) => {
 document.addEventListener('keydown', (event) => {
   event.preventDefault();
 
-  const code = event.code;
+  const { code } = event;
+  if (!CODES_MAP[code]) return;
   keysPressed.push(CODES_MAP[code]);
   if (shiftPressed && capsPressed) {
-    keys = KEYS_CAPS_SHIFT;
+    keys = lang === 'en' ? KEYS_CAPS_SHIFT : KEYS_CAPS_SHIFT_RU;
     renderKeys();
   } else if (shiftPressed) {
-    keys = KEYS_SHIFT;
+    keys = lang === 'en' ? KEYS_SHIFT : KEYS_SHIFT_RU;
     renderKeys();
   } else if (capsPressed) {
-    keys = KEYS_CAPS;
+    keys = lang === 'en' ? KEYS_CAPS : KEYS_CAPS_RU;
     renderKeys();
   } else {
-    keys = KEYS;
+    keys = lang === 'en' ? KEYS : KEYS_RU;
     renderKeys();
+  }
+  // console.log(event);
+  if (code === 'ControlLeft' && event.altKey) {
+    lang = lang === 'en' ? 'ru' : 'en';
+  } else if (code === 'AltLeft' && event.ctrlKey) {
+    lang = lang === 'en' ? 'ru' : 'en';
   }
 
   textarea.focus();
-  let start = textarea.selectionStart;
-  let end = textarea.selectionEnd;
+  const start = textarea.selectionStart;
+  const end = textarea.selectionEnd;
   const prevValue = textarea.value;
   let keyText;
-  let [rowNumer, keyNumber] = CODES_MAP[code]
+  const [rowNumer, keyNumber] = CODES_MAP[code]
     .split(',')
     .map((num) => Number(num));
   keys.forEach((row, i) => {
@@ -246,28 +280,28 @@ document.addEventListener('keydown', (event) => {
     if (capsPressed) {
       capsPressed = false;
       if (shiftPressed) {
-        keys = KEYS_SHIFT;
+        keys = lang === 'en' ? KEYS_SHIFT : KEYS_SHIFT_RU;
       } else {
-        keys = KEYS;
+        keys = lang === 'en' ? KEYS : KEYS_RU;
       }
       renderKeys();
     } else {
       capsPressed = true;
       keysPressed.push(CODES_MAP[code]);
       if (shiftPressed) {
-        keys = KEYS_CAPS_SHIFT;
+        keys = lang === 'en' ? KEYS_CAPS_SHIFT : KEYS_CAPS_SHIFT_RU;
       } else {
-        keys = KEYS_CAPS;
+        keys = lang === 'en' ? KEYS_CAPS : KEYS_CAPS_RU;
       }
       renderKeys();
     }
   } else if (keyText === 'Shift') {
     shiftPressed = true;
     if (capsPressed) {
-      keys = KEYS_CAPS_SHIFT;
+      keys = lang === 'en' ? KEYS_CAPS_SHIFT : KEYS_CAPS_SHIFT_RU;
       renderKeys();
     } else {
-      keys = KEYS_SHIFT;
+      keys = lang === 'en' ? KEYS_SHIFT : KEYS_SHIFT_RU;
       renderKeys();
     }
   } else {
@@ -292,7 +326,7 @@ document.addEventListener('keydown', (event) => {
 document.addEventListener('keyup', (event) => {
   event.preventDefault();
 
-  const code = event.code;
+  const { code } = event;
   if (code !== 'CapsLock') {
     keysPressed = keysPressed.filter((id) => id !== CODES_MAP[code]);
   } else if (capsPressed === false) {
@@ -303,16 +337,20 @@ document.addEventListener('keyup', (event) => {
     shiftPressed = false;
   }
   if (shiftPressed && capsPressed) {
-    keys = KEYS_CAPS_SHIFT;
+    keys = lang === 'en' ? KEYS_CAPS_SHIFT : KEYS_CAPS_SHIFT_RU;
     renderKeys();
   } else if (shiftPressed) {
-    keys = KEYS_SHIFT;
+    keys = lang === 'en' ? KEYS_SHIFT : KEYS_SHIFT_RU;
     renderKeys();
   } else if (capsPressed) {
-    keys = KEYS_CAPS;
+    keys = lang === 'en' ? KEYS_CAPS : KEYS_CAPS_RU;
     renderKeys();
   } else {
-    keys = KEYS;
+    keys = lang === 'en' ? KEYS : KEYS_RU;
     renderKeys();
   }
+});
+
+window.addEventListener('beforeunload', () => {
+  localStorage.setItem('keyboardLanguage', lang);
 });
