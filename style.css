@@ -41,6 +41,8 @@ body {
   background-color: darkblue;
   border-radius: 5px;
   user-select: none;
+  cursor: pointer;
+  transition: all 0.1s;
 }
 
 .key_dark {
@@ -54,4 +56,9 @@ body {
 
 .key_whitespace {
   min-width: 403px;
+}
+
+.key_active,
+.key:active {
+  background-color: rgb(32, 32, 188);
 }
