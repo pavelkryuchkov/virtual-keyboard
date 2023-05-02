@@ -61,7 +61,7 @@ function createKey(key, id) {
   return html;
 }
 
-function renderKeys() {
+function createKeys() {
   keyboard.innerHTML = '';
   keys.forEach((rowKeys, rowIndex) => {
     const keyboardRow = document.createElement('div');
@@ -73,8 +73,18 @@ function renderKeys() {
     keyboardRow.innerHTML = rowHTML;
     keyboard.append(keyboardRow);
   });
-  Array.from(keyboard.children).forEach((row) => {
-    Array.from(row.children).forEach((key) => {
+}
+
+function renderKeys() {
+  Array.from(keyboard.children).forEach((row, rowIndex) => {
+    Array.from(row.children).forEach((key, keyIndex) => {
+      key.classList.remove('key_active');
+      const changeKey = key;
+      let newText = keys[rowIndex][keyIndex];
+      if (newText === 'Whitespace') {
+        newText = '';
+      }
+      changeKey.textContent = newText;
       if (keysPressed.includes(key.dataset.keyId)) {
         key.classList.add('key_active');
       }
@@ -82,7 +92,7 @@ function renderKeys() {
   });
 }
 
-renderKeys();
+createKeys();
 
 textarea.addEventListener('blur', () => {
   textarea.selectionStart = textarea.value.length;
@@ -105,11 +115,11 @@ keyboard.addEventListener('mousedown', (event) => {
 
   if (keyText === 'Backspace') {
     if (start === end) {
-      let newValue = prevValue.slice(0, start - 1);
+      let newValue = prevValue.slice(0, Math.max(0, start - 1));
       newValue += prevValue.slice(end);
       textarea.value = newValue;
-      textarea.selectionStart = start - 1;
-      textarea.selectionEnd = start - 1;
+      textarea.selectionStart = Math.max(0, start - 1);
+      textarea.selectionEnd = Math.max(0, start - 1);
     } else {
       let newValue = prevValue.slice(0, start);
       newValue += prevValue.slice(end);
@@ -250,11 +260,11 @@ document.addEventListener('keydown', (event) => {
 
   if (keyText === 'Backspace') {
     if (start === end) {
-      let newValue = prevValue.slice(0, start - 1);
+      let newValue = prevValue.slice(0, Math.max(0, start - 1));
       newValue += prevValue.slice(end);
       textarea.value = newValue;
-      textarea.selectionStart = start - 1;
-      textarea.selectionEnd = start - 1;
+      textarea.selectionStart = Math.max(0, start - 1);
+      textarea.selectionEnd = Math.max(0, start - 1);
     } else {
       let newValue = prevValue.slice(0, start);
       newValue += prevValue.slice(end);
