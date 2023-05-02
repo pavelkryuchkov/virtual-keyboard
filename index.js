@@ -25,7 +25,7 @@ function renderPage() {
   document.body.append(text1);
 
   const text2 = document.createElement('p');
-  text2.textContent = 'Для переключения языка комбинация: левыe ctrl + alt';
+  text2.textContent = 'Для переключения языка нажмите левыe ctrl + alt';
   document.body.append(text2);
 }
 
